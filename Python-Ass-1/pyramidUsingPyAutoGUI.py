@@ -7,6 +7,7 @@ def draw_pyramid(height):
         pyautogui.typewrite(line)
         pyautogui.press('enter')
 
+# Allow some time to switch to a text editor or any place you want to draw a pyramid
 print("You have 5 seconds to switch to the window where you want to draw the pyramid...")
 time.sleep(5)
 
