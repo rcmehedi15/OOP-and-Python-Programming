@@ -6,6 +6,7 @@ class Bank:
         self.total_bank_balance = 0
         self.loan_feature_on = True
         self.total_loan_amount = 0
+        self.admin_password = "admin"  # Simplified admin authentication
 
     def create_account(self, name, email, address, account_type):
         account_number = random.randint(10000, 99999)
@@ -89,38 +90,46 @@ class Bank:
 def user_interface(bank):
     while True:
         print("\nUser Menu")
-        print("1. Deposit Money")
-        print("2. Withdraw Money")
-        print("3. Check Balance")
-        print("4. Transfer Money")
-        print("5. Check Transaction History")
-        print("6. Take a Loan")
-        print("7. Exit")
+        print("1. Create Account")
+        print("2. Deposit Money")
+        print("3. Withdraw Money")
+        print("4. Check Balance")
+        print("5. Transfer Money")
+        print("6. Check Transaction History")
+        print("7. Take a Loan")
+        print("8. Exit")
         choice = input("Choose an option: ")
 
         if choice == '1':
+            name = input("Enter your name: ")
+            email = input("Enter your email: ")
+            address = input("Enter your address: ")
+            account_type = input("Enter account type (Savings/Current): ")
+            account_number = bank.create_account(name, email, address, account_type)
+            print(f"Account created successfully! Your account number is {account_number}.")
+        elif choice == '2':
             acc_num = int(input("Enter your account number: "))
             amount = float(input("Enter the amount to deposit: "))
             if bank.deposit(acc_num, amount):
                 print("Deposit successful.")
             else:
                 print("Deposit failed. Account not found.")
-        elif choice == '2':
+        elif choice == '3':
             acc_num = int(input("Enter your account number: "))
             amount = float(input("Enter the amount to withdraw: "))
             result = bank.withdraw(acc_num, amount)
             if result == True:
                 print("Withdrawal successful.")
             else:
-                print(result)
-        elif choice == '3':
+                print(result)  # Error message
+        elif choice == '4':
             acc_num = int(input("Enter your account number: "))
             result = bank.check_balance(acc_num)
             if isinstance(result, str):
-                print(result)
+                print(result)  # Error message
             else:
                 print(f"Your current balance is: ${result:.2f}")
-        elif choice == '4':
+        elif choice == '5':
             from_acc = int(input("Enter your account number: "))
             to_acc = int(input("Enter the account number to transfer to: "))
             amount = float(input("Enter the amount to transfer: "))
@@ -128,45 +137,52 @@ def user_interface(bank):
             if result == True:
                 print("Transfer successful.")
             else:
-                print(result)
-        elif choice == '5':
+                print(result)  # Error message
+        elif choice == '6':
             acc_num = int(input("Enter your account number: "))
             history = bank.transaction_history(acc_num)
             if isinstance(history, str):
-                print(history)
+                print(history)  # Error message
             else:
                 for transaction in history:
                     print(f"{transaction[0]} of ${transaction[1]:.2f}")
-        elif choice == '6':
+        elif choice == '7':
             acc_num = int(input("Enter your account number: "))
             amount = float(input("Enter the loan amount: "))
             if bank.loan(acc_num, amount):
                 print("Loan granted successfully.")
             else:
-                print("Loan cannot be processed. Either loan feature is off or loan limit reached.")
-        elif choice == '7':
+                print("Loan cannot be processed.")
+        elif choice == '8':
+            print("Thank you for using the user menu. Goodbye!")
             break
         else:
             print("Invalid option, please try again.")
 
 def admin_interface(bank):
+    password = input("Enter the admin password: ")
+    if password != bank.admin_password:
+        print("Incorrect password!")
+        return
+
     while True:
         print("\nAdmin Menu")
         print("1. Create Account")
         print("2. Delete Account")
         print("3. List All Accounts")
         print("4. Check Total Bank Balance")
-        print("5. Toggle Loan Feature")
-        print("6. Exit")
+        print("5. Check Total Loan Amount")
+        print("6. Toggle Loan Feature")
+        print("7. Exit")
         choice = input("Choose an option: ")
 
         if choice == '1':
-            name = input("Enter name: ")
-            email = input("Enter email: ")
-            address = input("Enter address: ")
-            account_type = input("Enter account type (Savings/Current): ")
+            name = input("Enter the name for the new account: ")
+            email = input("Enter the email: ")
+            address = input("Enter the address: ")
+            account_type = input("Enter the account type (Savings/Current): ")
             account_number = bank.create_account(name, email, address, account_type)
-            print(f"Account created successfully! Account number: {account_number}")
+            print(f"Account created successfully! The account number is {account_number}.")
         elif choice == '2':
             acc_num = int(input("Enter the account number to delete: "))
             if bank.delete_account(acc_num):
@@ -179,12 +195,16 @@ def admin_interface(bank):
             for acc in accounts:
                 print(f"Account Number: {acc[0]}, Name: {acc[1]}, Balance: ${acc[2]:.2f}")
         elif choice == '4':
-            print(f"Total bank balance: ${bank.total_balance():.2f}")
+            print(f"Total bank balance is: ${bank.total_balance():.2f}")
         elif choice == '5':
-            status = input("Enable loan feature? (yes/no): ").lower() == 'yes'
-            bank.toggle_loan_feature(status)
-            print("Loan feature updated successfully.")
+            print(f"Total loan amount is: ${bank.total_loan_amount:.2f}")
         elif choice == '6':
+            new_status = not bank.loan_feature_on
+            bank.toggle_loan_feature(new_status)
+            status = "on" if new_status else "off"
+            print(f"Loan feature has been turned {status}.")
+        elif choice == '7':
+            print("Thank you for using the admin menu. Goodbye!")
             break
         else:
             print("Invalid option, please try again.")
@@ -192,14 +212,20 @@ def admin_interface(bank):
 def main():
     bank = Bank()
     while True:
-        print("\nWelcome to the Banking System")
-        role = input("Are you a user or an admin? (user/admin): ")
-        if role.lower() == 'user':
+        print("\nMain Menu")
+        print("1. User")
+        print("2. Admin")
+        print("3. Exit")
+        role_choice = input("Are you a User or an Admin? Choose an option: ")
+        if role_choice == '1':
             user_interface(bank)
-        elif role.lower() == 'admin':
+        elif role_choice == '2':
             admin_interface(bank)
+        elif role_choice == '3':
+            print("Exiting the system. Goodbye!")
+            break
         else:
-            print("Invalid role selected. Please enter 'user' or 'admin'.")
+            print("Invalid choice, please enter 1, 2, or 3.")
 
 if __name__ == "__main__":
     main()
